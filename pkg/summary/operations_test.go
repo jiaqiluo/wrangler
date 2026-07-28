@@ -165,9 +165,10 @@ func TestCheckOperationTransitioning(t *testing.T) {
 			expectedTransit: true,
 		},
 		{
-			name:          "no conditions passes through untouched",
-			conditions:    nil,
-			expectedState: "",
+			name:            "an unreconciled operation with no conditions is pending",
+			conditions:      nil,
+			expectedState:   "pending",
+			expectedTransit: true,
 		},
 		{
 			name: "no condition set to True passes through untouched",
@@ -269,6 +270,15 @@ func TestSummarizeOperation(t *testing.T) {
 				Transitioning: true,
 				Message:       []string{"Waiting in step Preflight: failing plan for machine-7qrnd"},
 			},
+		},
+		{
+			name: "freshly created, no status yet",
+			obj: &unstructured.Unstructured{Object: map[string]interface{}{
+				"apiVersion": "operation.cattle.io/v1alpha1",
+				"kind":       "EncryptionKeyRotation",
+				"metadata":   map[string]interface{}{"name": "op", "namespace": "fleet-default"},
+			}},
+			expected: Summary{State: "pending", Transitioning: true},
 		},
 		{
 			name: "pending",

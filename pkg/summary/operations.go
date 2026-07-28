@@ -49,9 +49,8 @@ var operationStates = []struct {
 // canceled operation retains InProgress=True, and terminal conditions must
 // outrank Paused so that a paused-but-finished operation reads as finished.
 //
-// When no condition is True the summary passes through untouched, leaving
-// checkPhase and the kstatus fallback to handle objects the controller has not
-// reconciled yet.
+// When conditions exist but none are True the summary passes through untouched,
+// leaving checkPhase to name the state.
 func checkOperationTransitioning(conditions []Condition, summary Summary) Summary {
 	for _, state := range operationStates {
 		for _, c := range conditions {
@@ -72,6 +71,14 @@ func checkOperationTransitioning(conditions []Condition, summary Summary) Summar
 
 			return summary
 		}
+	}
+
+	// Rancher writes a condition alongside every phase, so an operation with no
+	// conditions has not been reconciled yet. Without this the kstatus fallback
+	// in checkStandard reports a brand new operation as active.
+	if len(conditions) == 0 {
+		summary.State = "pending"
+		summary.Transitioning = true
 	}
 
 	return summary
