@@ -74,8 +74,8 @@ func checkOperationTransitioning(conditions []Condition, summary Summary) Summar
 	}
 
 	// Rancher writes a condition alongside every phase, so an operation with no
-	// conditions has not been reconciled yet. Without this the kstatus fallback
-	// in checkStandard reports a brand new operation as active.
+	// conditions has not been reconciled yet. Without this, the kstatus fallback
+	// in checkStandard reports a brand-new operation as active.
 	if len(conditions) == 0 {
 		summary.State = "pending"
 		summary.Transitioning = true

@@ -374,6 +374,9 @@ func checkTransitioning(obj data.Object, conditions []Condition, summary Summary
 	if isCAPICluster(obj) {
 		return checkCAPIClusterTransitioning(obj, conditions, summary)
 	}
+	if isOperation(obj) {
+		return checkOperationTransitioning(conditions, summary)
+	}
 	return checkGenericTransitioning(obj, conditions, summary)
 }
 
@@ -740,15 +743,7 @@ func checkCAPIClusterTransitioning(obj data.Object, conditions []Condition, summ
 	return summary
 }
 
-func checkGenericTransitioning(obj data.Object, conditions []Condition, summary Summary) Summary {
-	// Dispatched here rather than from checkTransitioning because
-	// NormalizeConditions stamps each individual condition by calling this
-	// function directly, and operation conditions are misread by the generic
-	// tables below in both paths.
-	if isOperation(obj) {
-		return checkOperationTransitioning(conditions, summary)
-	}
-
+func checkGenericTransitioning(_ data.Object, conditions []Condition, summary Summary) Summary {
 	for _, c := range conditions {
 		newState, ok := TransitioningUnknown[c.Type()]
 		if !ok {
